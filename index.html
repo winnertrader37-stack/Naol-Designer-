@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="om"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Naol 3D Design</title>
+<!DOCTYPE html><html lang="om"><head><meta http-equiv="Cache-Control" content="no-cache"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Naol 3D Design</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:#12131f;color:#e8e8f4;font:14px system-ui,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none}
@@ -39,7 +39,7 @@ body.fs #side{display:none}
 <div id="app">
 <header><h1>Naol <b>3D</b> Design</h1><div><button id="un">↶</button> <button id="rd">↷</button> <button id="fs">⇅</button></div></header>
 <main>
-<div id="stage"><div id="cw"><canvas id="c"></canvas><div id="hint">Meesha tuqi = filadhu • harkisi = sochoosi • bakka duwwaa harkisi = naannoo naanna’i • quba lama = zoom • v5</div><div id="st"></div></div><div id="tools"></div></div>
+<div id="stage"><div id="cw"><canvas id="c"></canvas><div id="hint">Meesha tuqi = filadhu • harkisi = sochoosi • bakka duwwaa harkisi = naannoo naanna’i • quba lama = zoom • v6</div><div id="st"></div></div><div id="tools"></div></div>
 <div id="side"><div id="tabs"></div><div id="pnl">
 
 <div class="pg" id="pg-pre"><div class="grid" id="gpre"></div><p><small>Fakkeenya tokko filachuun qaama hundaa jijjiiruu, halluu itti dabaluu, logo itti maxxansuu ni dandeessa.</small></p></div>
@@ -109,7 +109,9 @@ body.fs #side{display:none}
 </div></div></main></div>
 <div id="camov"><video id="cvid" playsinline autoplay muted></video><div><button id="snap" style="background:#8b5cf6">📸 Scan godhi</button><button id="camx">Cufi</button></div></div>
 <div id="toast"></div>
+<script>addEventListener('error',function(e){var d=document.getElementById('eb');if(!d){d=document.createElement('div');d.id='eb';d.style.cssText='position:fixed;left:0;right:0;top:0;z-index:99;background:#b71c1c;color:#fff;padding:8px;font-size:12px';document.documentElement.appendChild(d)}d.textContent='Dogoggora: '+e.message+' (line '+e.lineno+') v6'});</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>');</script>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],T=THREE,PI=Math.PI,LS=localStorage;
 const cl=(v,a,b)=>Math.min(b,Math.max(a,v));
