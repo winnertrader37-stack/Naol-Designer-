@@ -1,0 +1,319 @@
+<!DOCTYPE html><html lang="om"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Naol 3D Design</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#12131f;color:#e8e8f4;font:14px system-ui,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none}
+#app{display:flex;flex-direction:column;height:100dvh}
+header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#1b1d33;border-bottom:1px solid #2e3150}
+h1{font-size:18px;margin:0}h1 b{color:#f59e0b}
+main{flex:1;min-height:0;display:flex;flex-direction:column}
+#stage{flex:1;min-height:0;display:flex;flex-direction:column}
+#cw{flex:1;min-height:0;position:relative}
+#c{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+#hint{color:#445;position:absolute;left:8px;top:6px;font-size:11px;opacity:.7;pointer-events:none;right:8px}
+#st{position:absolute;right:10px;bottom:8px;color:#ff5a5a;font-weight:700}
+#tools,#tabs{display:flex;gap:6px;padding:6px;overflow-x:auto;background:#161727}
+#tabs{background:#1b1d33}
+button,select,input{font:inherit}
+button{background:#23253d;color:#e8e8f4;border:1px solid #3a3d63;border-radius:10px;padding:8px 10px;white-space:nowrap}
+button.on{background:#8b5cf6;border-color:#8b5cf6}
+#side{height:40%;display:flex;flex-direction:column;min-height:0;background:#1b1d33;border-top:1px solid #2e3150}
+#pnl{flex:1;overflow:auto;padding:8px 10px}
+.pg{display:none}.pg.on{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.grid button{padding:12px 4px;font-size:12px}
+label{display:block;margin:8px 0 2px;font-size:12px;opacity:.85}
+input[type=range]{width:100%}input[type=text],select{width:100%;padding:8px;background:#12131f;color:#fff;border:1px solid #3a3d63;border-radius:8px}
+input[type=color]{width:100%;height:38px;border:0;background:none}
+.au{background:#23253d;border-radius:10px;padding:8px;margin:6px 0}
+.sw{display:flex;flex-wrap:wrap;gap:8px}.sw i{width:38px;height:38px;border-radius:50%;border:2px solid #fff3}
+h3{color:#f59e0b;font-size:13px;margin:12px 0 4px}
+small{opacity:.7}
+#rv,#dlv{display:none;width:100%;margin-top:8px}#dlv{text-align:center;background:#8b5cf6;padding:10px;border-radius:10px;color:#fff;text-decoration:none}
+#camov{display:none;position:fixed;inset:0;background:#000;z-index:9;flex-direction:column}
+#camov video{flex:1;min-height:0;width:100%;object-fit:contain}
+#camov div{display:flex;gap:10px;padding:14px;justify-content:center}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#000c;padding:8px 14px;border-radius:20px;opacity:0;transition:.3s;pointer-events:none;z-index:10}
+body.fs #side{display:none}
+@media (orientation:landscape) and (min-width:700px){main{flex-direction:row}#side{height:auto;width:42%;border-top:0;border-left:1px solid #2e3150}}
+</style></head><body>
+<div id="app">
+<header><h1>Naol <b>3D</b> Design</h1><div><button id="un">↶</button> <button id="rd">↷</button> <button id="fs">⇅</button></div></header>
+<main>
+<div id="stage"><div id="cw"><canvas id="c"></canvas><div id="hint">Meesha tuqi = filadhu • harkisi = sochoosi • bakka duwwaa harkisi = naannoo naanna’i • quba lama = zoom</div><div id="st"></div></div><div id="tools"></div></div>
+<div id="side"><div id="tabs"></div><div id="pnl">
+
+<div class="pg" id="pg-pre"><div class="grid" id="gpre"></div><p><small>Fakkeenya tokko filachuun qaama hundaa jijjiiruu, halluu itti dabaluu, logo itti maxxansuu ni dandeessa.</small></p></div>
+
+<div class="pg" id="pg-add"><div class="grid" id="gadd"></div></div>
+
+<div class="pg" id="pg-ed">
+<label>Halluu</label><input type="color" id="pc" value="#4f8cff">
+<label>Akaakuu meeshaa</label><select id="pm"><option value="gloss">Ifaa (gloss)</option><option value="matte">Matte</option><option value="metal">Metal</option><option value="glass">Galaasii</option><option value="glow">Ibsaa (glow)</option></select>
+<label><input type="checkbox" id="pw"> Wireframe</label>
+<label>Bal’ina X</label><input type="range" id="sx" min=".1" max="8" step=".05" value="1">
+<label>Bal’ina Y (olka’aa)</label><input type="range" id="sy" min=".1" max="8" step=".05" value="1">
+<label>Bal’ina Z</label><input type="range" id="sz" min=".1" max="8" step=".05" value="1">
+<label>Naanni’uu (°)</label><input type="range" id="ry" min="0" max="360" step="1" value="0">
+<label>Ol / Gad (Y)</label><input type="range" id="py" min="-2" max="12" step=".05" value="0">
+</div>
+
+<div class="pg" id="pg-col"><h3>Halluu filadhu (meeshaa filatame irratti)</h3><div class="sw" id="sw"></div></div>
+
+<div class="pg" id="pg-logo">
+<label>Barruu / Logo</label><input type="text" id="lt" value="Naol 3D">
+<label>Halluu barruu</label><input type="color" id="lc" value="#ffffff">
+<p><button id="la">➕ Logo dabali</button> <button id="lu">✏️ Filatame jijjiiri</button></p>
+</div>
+
+<div class="pg" id="pg-env">
+<label>Halluu duubaa</label><input type="color" id="bg" value="#dfe3ea">
+<label>Ifa</label><input type="range" id="li" min=".2" max="2" step=".05" value=".9">
+<label><input type="checkbox" id="gr" checked> Grid agarsiisi</label>
+<label><input type="checkbox" id="shd" checked> Gaaddidduu (shadow)</label>
+<label><input type="checkbox" id="fl" checked> Lafa halluu qabu</label><input type="color" id="fc" value="#e6e9ef">
+</div>
+
+<div class="pg" id="pg-scan">
+<h3>Suuraa → 3D (relief)</h3>
+<p><button onclick="$('#sf').click()">🖼️ Suuraa fe’i</button> <button id="cm">📷 Kaameraa scan</button></p>
+<input type="file" id="sf" accept="image/*" hidden>
+<label>Gadi fageenya (filatame scan)</label><input type="range" id="dep" min=".1" max="4" step=".05" value="1.2">
+<p><button id="inv">🔁 Jijjiiri (dukkana↔ifa)</button></p>
+<p><small>Kunis suuraa tokko irraa gadi fageenya (relief) hojjata. Qaama guutuu (nama/mi’a) irraa 3D dhugaa fudhachuuf suuraa baay’ee fi AI/photogrammetry nu barbaachisa.</small></p>
+</div>
+
+<div class="pg" id="pg-sv">
+<label>Maqaa pirojektii</label><input type="text" id="pn2" value="Pirojektii koo">
+<p><button id="sp">💾 Kuusi</button> <button id="np">🆕 Haaraa</button> <button id="ex">⬆️ Export</button> <button onclick="$('#im').click()">⬇️ Import</button> <button id="pg2">📷 PNG</button></p>
+<input type="file" id="im" accept=".json" hidden>
+<small>Hojiin kee ofumaan ni kuufama (autosave). Cufnee deebi’ee yeroo banu itti fufta.</small>
+<h3>Pirojektiiwwan kuufaman</h3><div id="pl"></div>
+</div>
+
+<div class="pg" id="pg-vd">
+<h3>Viidiyoo 3D</h3>
+<label>Yeroo (sekondii): <span id="dv">15</span></label><input type="range" id="dur" min="5" max="60" step="1" value="15">
+<label>Qulqullina</label><select id="q"><option value="1280">HD 720p</option><option value="1920" selected>Full HD 1080p</option><option value="2560">2K</option></select>
+<label>Saffisa naanna’uu</label><input type="range" id="spd" min=".1" max="3" step=".05" value=".8">
+<label>Ol-gadi (camera height swing)</label><input type="range" id="sw2" min="0" max=".6" step=".02" value=".15">
+<label>Zoom</label><select id="zm"><option value="none">Hin jiru</option><option value="in">Zoom in</option><option value="out">Zoom out</option><option value="pulse">In → Out</option></select>
+<label><input type="checkbox" id="sl"> Slow mode (cinematic)</label>
+<label><input type="checkbox" id="hk" checked> Hook (jalqaba saffisaan, booda suuta)</label>
+<p><button id="pv">▶️ Ilaali</button> <button id="rc" style="background:#c62828">⏺ Waraabi</button> <button id="stp">⏹</button></p>
+<video id="rv" controls playsinline></video><a id="dlv">⬇️ Viidiyoo buusi</a>
+<h3>Sagalee (hanga 20)</h3>
+<p><button onclick="$('#af').click()">🎵 Audio dabali</button></p><input type="file" id="af" accept="audio/*" multiple hidden>
+<div id="aul"></div>
+</div>
+
+</div></div></main></div>
+<div id="camov"><video id="cvid" playsinline autoplay muted></video><div><button id="snap" style="background:#8b5cf6">📸 Scan godhi</button><button id="camx">Cufi</button></div></div>
+<div id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],T=THREE,PI=Math.PI,LS=localStorage;
+const cl=(v,a,b)=>Math.min(b,Math.max(a,v));
+function toast(t){const e=$('#toast');e.textContent=t;e.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>e.style.opacity=0,2200)}
+
+/* ---------- scene ---------- */
+const cv=$('#c'),R=new T.WebGLRenderer({canvas:cv,antialias:true,preserveDrawingBuffer:true});
+R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.05;R.outputEncoding=T.sRGBEncoding;
+const S=new T.Scene();S.background=new T.Color('#dfe3ea');S.fog=new T.Fog('#dfe3ea',35,110);
+const cam=new T.PerspectiveCamera(50,1,.1,1000);
+const hemi=new T.HemisphereLight(0xffffff,0x444466,.4);S.add(hemi);
+const sun=new T.DirectionalLight(0xffffff,.9);sun.position.set(6,10,6);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.bias=-.0004;sun.shadow.radius=3;
+Object.assign(sun.shadow.camera,{left:-12,right:12,top:12,bottom:-12});sun.shadow.camera.updateProjectionMatrix();S.add(sun);
+(()=>{const e=new T.Scene(),c=document.createElement('canvas');c.width=4;c.height=256;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'#cfd8ea');g.addColorStop(.5,'#ffffff');g.addColorStop(.52,'#9aa0aa');g.addColorStop(1,'#6b7080');x.fillStyle=g;x.fillRect(0,0,4,256);
+e.add(new T.Mesh(new T.SphereGeometry(50,32,16),new T.MeshBasicMaterial({map:new T.CanvasTexture(c),side:T.BackSide})));
+[[0,30,0,30,1,30],[-25,12,0,1,14,30],[25,12,0,1,14,30],[0,10,-28,40,14,1]].forEach(a=>{const m=new T.MeshBasicMaterial();m.color.setScalar(5);const b=new T.Mesh(new T.BoxGeometry(a[3],a[4],a[5]),m);b.position.set(a[0],a[1],a[2]);e.add(b)});
+S.environment=new T.PMREMGenerator(R).fromScene(e,.02).texture})();
+const grid=new T.GridHelper(60,60,0xaab1c0,0xc5cad6);S.add(grid);
+const ground=new T.Mesh(new T.PlaneGeometry(200,200),new T.ShadowMaterial({opacity:.35}));ground.rotation.x=-PI/2;ground.receiveShadow=true;S.add(ground);
+const fl=new T.Mesh(new T.PlaneGeometry(200,200),new T.MeshStandardMaterial({color:'#e6e9ef',roughness:.9}));fl.rotation.x=-PI/2;fl.position.y=-.01;fl.receiveShadow=true;fl.visible=true;S.add(fl);
+const world=new T.Group();S.add(world);
+const sh=new T.Box3Helper(new T.Box3(),0xffb300);sh.visible=false;S.add(sh);
+let sel=null,rec=0,mr=null,an=null,mode='move',snap=false,hist=[],hi=-1;
+
+const o={th:.8,ph:1.15,r:11,t:new T.Vector3(0,1,0)};
+function uc(){const s=Math.sin(o.ph);cam.position.set(o.t.x+o.r*s*Math.sin(o.th),o.t.y+o.r*Math.cos(o.ph),o.t.z+o.r*s*Math.cos(o.th));cam.lookAt(o.t)}
+function fit(w,h,pr){R.setPixelRatio(pr);R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+function rs(){if(rec)return;const b=$('#cw').getBoundingClientRect();if(b.width>0)fit(b.width,b.height,Math.min(devicePixelRatio||1,2))}
+new ResizeObserver(rs).observe($('#cw'));
+
+/* ---------- materials & parts ---------- */
+const MT={matte:{roughness:.85,metalness:0},gloss:{roughness:.3,metalness:.25,clearcoat:1,clearcoatRoughness:.06},metal:{roughness:.22,metalness:.95},glass:{roughness:.02,metalness:0,transparent:true,opacity:.4},glow:{roughness:.4,metalness:0}};
+function mat(c,m,w){const p=Object.assign({color:c,wireframe:!!w},MT[m]||MT.gloss);if(m==='glow'){p.emissive=c;p.emissiveIntensity=.8}return new T.MeshPhysicalMaterial(p)}
+function rbox(r,n){const g=new T.BoxGeometry(1,1,1,n,n,n),p=g.attributes.position,nm=g.attributes.normal,v=new T.Vector3(),c=new T.Vector3(),d=new T.Vector3(),k=.5-r;
+for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);c.set(cl(v.x,-k,k),cl(v.y,-k,k),cl(v.z,-k,k));d.copy(v).sub(c);if(d.lengthSq()>1e-8){d.normalize();nm.setXYZ(i,d.x,d.y,d.z);d.multiplyScalar(r)}p.setXYZ(i,c.x+d.x,c.y+d.y,c.z+d.z)}return g}
+const GE={box:()=>rbox(.12,14),sbox:()=>new T.BoxGeometry(1,1,1),cabin:()=>{const h=new T.Shape();h.moveTo(-.5,-.3);h.quadraticCurveTo(-.4,.25,-.2,.3);h.lineTo(.2,.3);h.quadraticCurveTo(.4,.25,.55,-.3);h.lineTo(-.5,-.3);const g=new T.ExtrudeGeometry(h,{depth:.8,bevelEnabled:true,bevelSize:.04,bevelThickness:.05,bevelSegments:4,curveSegments:12});g.translate(0,0,-.4);return g},sph:()=>new T.SphereGeometry(.5,32,20),cyl:()=>new T.CylinderGeometry(.5,.5,1,32),cone:()=>new T.ConeGeometry(.5,1,32),pyr:()=>new T.ConeGeometry(.7,1,4),hex:()=>new T.CylinderGeometry(.5,.5,1,6),tor:()=>new T.TorusGeometry(.4,.12,16,40),dome:()=>new T.SphereGeometry(.5,32,16,0,PI*2,0,PI/2)};
+function part(s,rc,rm,rw){const[k,x,y,z,sx,sy,sz,c,m,rx=0,ry=0,rz=0]=s,mn=c==='main';let g;
+ if(k==='wheel'){g=new T.Group();const tm=mat('#141414','matte'),t=new T.Mesh(new T.TorusGeometry(.36,.14,16,36),tm),sw=new T.Mesh(new T.CylinderGeometry(.36,.36,.26,32),tm),h=new T.Mesh(new T.CylinderGeometry(.33,.33,.27,32),mat('#d5d8df','metal')),cap=new T.Mesh(new T.CylinderGeometry(.07,.07,.3,16),mat('#555555','metal'));
+ sw.rotation.x=h.rotation.x=cap.rotation.x=PI/2;t.castShadow=true;g.add(t,sw,h,cap);
+ for(let i=0;i<10;i++){const a=(i%5)*2*PI/5,sp=new T.Mesh(new T.BoxGeometry(.05,.27,.03),mat('#2b2e36','metal'));sp.position.set(Math.sin(a)*.17,Math.cos(a)*.17,i<5?.14:-.14);sp.rotation.z=-a;g.add(sp)}}
+ else{g=new T.Mesh(GE[k](),mat(mn?rc:c,mn?rm:m,mn&&rw));g.castShadow=(mn?rm:m)!=='glass';g.receiveShadow=true;g.userData.main=mn}
+ g.position.set(x,y,z);g.scale.set(sx,sy,sz);g.rotation.set(rx,ry,rz);return g}
+const WH=(x,y,z,d,w)=>['wheel',x,y,z,d,d,w];
+const PRE={
+car:{l:'🚗 Konkolaataa',c:'#e53935',m:'gloss',parts:[['box',0,.62,0,4.4,.62,1.9,'main'],['cabin',-.35,1.17,0,2.1,.95,1.75,'#141c28','gloss'],['box',-.35,1.5,0,1.2,.08,1.55,'main'],['box',2.17,.55,0,.08,.2,1,'#111111','matte'],['box',2.17,.32,0,.2,.14,1.8,'#2a2a2a','matte'],['box',-2.17,.32,0,.2,.14,1.8,'#2a2a2a','matte'],['sph',2.1,.74,.68,.1,.2,.4,'#fff6c8','glow'],['sph',2.1,.74,-.68,.1,.2,.4,'#fff6c8','glow'],['sph',-2.17,.75,.7,.08,.18,.4,'#ff2a2a','glow'],['sph',-2.17,.75,-.7,.08,.18,.4,'#ff2a2a','glow'],['box',.6,1.0,.98,.16,.1,.22,'main'],['box',.6,1.0,-.98,.16,.1,.22,'main'],WH(1.35,.4,.97,.8,1),WH(1.35,.4,-.97,.8,1),WH(-1.3,.4,.97,.8,1),WH(-1.3,.4,-.97,.8,1)]},
+jeep:{l:'🚙 Jeep/SUV',c:'#4b6b3a',m:'matte',parts:[['box',0,.95,0,4.4,.9,2,'main'],['box',-.5,1.85,0,2.8,.9,1.9,'main'],['box',-.5,1.9,0,2.82,.5,1.92,'#9fd6ff','glass'],['box',-.5,2.35,0,2.7,.06,1.7,'#222222','matte'],['box',2.22,.6,0,.2,.3,2.1,'#222222','matte'],['box',-2.22,.6,0,.2,.3,2.1,'#222222','matte'],['sph',2.2,1.1,.65,.3,.3,.3,'#fff3b0','glow'],['sph',2.2,1.1,-.65,.3,.3,.3,'#fff3b0','glow'],WH(1.5,.55,1.1,1.1,.6),WH(1.5,.55,-1.1,1.1,.6),WH(-1.5,.55,1.1,1.1,.6),WH(-1.5,.55,-1.1,1.1,.6),['wheel',-2.4,1.4,0,1,1,.5,0,0,0,PI/2,0]]},
+plane:{l:'✈️ Xiyyaara',c:'#2f6fe4',m:'gloss',parts:[['cyl',0,1.2,0,.9,5,.9,'main',0,0,0,PI/2],['cone',2.95,1.2,0,.9,.9,.9,'main',0,0,0,-PI/2],['cone',-2.95,1.2,0,.9,.9,.9,'main',0,0,0,PI/2],['box',.2,1.1,0,1.1,.1,6.5,'#e8e8e8','gloss'],['box',-2.6,1.9,0,.9,1,.08,'main'],['box',-2.7,1.25,0,.7,.08,2.2,'#e8e8e8','gloss'],['sph',1.4,1.6,0,1,.55,.7,'#9fd6ff','glass'],['box',3.45,1.2,0,.06,1.8,.18,'#222222','matte'],['box',.8,.7,.7,.06,.9,.06,'#222222','matte'],['box',.8,.7,-.7,.06,.9,.06,'#222222','matte'],WH(.8,.3,.7,.6,.25),WH(.8,.3,-.7,.6,.25)]},
+boat:{l:'⛵ Doonii',c:'#1565c0',m:'gloss',parts:[['box',0,.4,0,4,.6,1.6,'main'],['pyr',2.6,.4,0,.43,1.2,1.14,'main',0,0,0,-PI/2],['box',-.3,1,0,1.4,.7,1.1,'#ffffff','gloss'],['box',-.3,1.05,0,1.42,.3,1.12,'#9fd6ff','glass'],['cyl',.8,1.8,0,.08,2.4,.08,'#dddddd','metal'],['box',.55,1.9,0,.02,1.6,.9,'#ffffff','matte']]},
+rocket:{l:'🚀 Roogeettii',c:'#e53935',m:'gloss',parts:[['cyl',0,2.5,0,1,3,1,'#f2f2f2','gloss'],['cone',0,4.7,0,1,1.4,1,'main'],['box',.7,1.5,0,.9,1.1,.08,'main'],['box',-.7,1.5,0,.9,1.1,.08,'main'],['box',0,1.5,.7,.08,1.1,.9,'main'],['box',0,1.5,-.7,.08,1.1,.9,'main'],['sph',0,3.3,.45,.45,.45,.25,'#9fd6ff','glass'],['cone',0,.5,0,.7,1,.7,'#ff8a00','glow',PI,0,0]]},
+house:{l:'🏠 Mana',c:'#b3412f',m:'matte',parts:[['box',0,1,0,3,2,3,'#f1e4c8','matte'],['pyr',0,2.9,0,3.5,1.8,3.5,'main',0,PI/4,0],['box',0,.6,1.51,.7,1.2,.05,'#5a3a22','matte'],['box',.9,1.2,1.51,.6,.6,.05,'#9fd6ff','glass'],['box',-.9,1.2,1.51,.6,.6,.05,'#9fd6ff','glass']]},
+tree:{l:'🌳 Muka',c:'#2e8b3a',m:'matte',parts:[['cyl',0,.6,0,.3,1.2,.3,'#6b4423','matte'],['cone',0,1.8,0,1.8,1.5,1.8,'main'],['cone',0,2.7,0,1.3,1.2,1.3,'main']]},
+laptop:{l:'💻 Laaptoppii',c:'#9aa0aa',m:'metal',parts:[['box',0,.08,0,3.2,.16,2.2,'main'],['box',0,.17,.2,2.8,.02,1.2,'#222222','matte'],['box',0,1.15,-1.05,3.2,2,.1,'main',0,-.25,0,0],['box',0,1.15,-.99,3,1.8,.02,'#1d3a8a','glow',-.25,0,0]]},
+phone:{l:'📱 Bilbila',c:'#3a3f4d',m:'gloss',parts:[['box',0,1.6,0,1.5,3.2,.16,'main'],['box',0,1.6,-.085,1.4,3.1,.02,'#05070c','gloss'],['box',-.38,2.65,.09,.78,.78,.04,'#2b2f3a','gloss'],['cyl',-0.55,2.85,0.14,.3,.05,.3,'#9aa0aa','metal',PI/2,0,0],['cyl',-0.55,2.85,0.14500000000000002,.2,.05,.2,'#05070c','gloss',PI/2,0,0],['cyl',-0.55,2.45,0.14,.3,.05,.3,'#9aa0aa','metal',PI/2,0,0],['cyl',-0.55,2.45,0.14500000000000002,.2,.05,.2,'#05070c','gloss',PI/2,0,0],['cyl',-0.2,2.65,0.14,.3,.05,.3,'#9aa0aa','metal',PI/2,0,0],['cyl',-0.2,2.65,0.14500000000000002,.2,.05,.2,'#05070c','gloss',PI/2,0,0],['sph',-.15,2.95,.12,.1,.1,.1,'#fff8d0','glow'],['box',.76,2.3,0,.04,.5,.06,'#777777','metal'],['box',-.76,2.4,0,.04,.3,.06,'#777777','metal']]}};
+PRE.build={l:'🏢 Ijaarsa',c:'#8fa3b8',m:'metal',parts:[['sbox',0,3,0,2.4,6,2.4,'main']].concat([...Array(10).keys()].flatMap(i=>[['sbox',0,.6+i*.55,1.21,2.1,.3,.02,'#9fd6ff','glass'],['sbox',0,.6+i*.55,-1.21,2.1,.3,.02,'#9fd6ff','glass']]))};
+const PRIM=[['box','⬜ Duwwaa'],['sph','⚪ Kubbaa'],['cyl','🥫 Silindarii'],['cone','🔺 Koonii'],['pyr','🛖 Pirammiidii'],['hex','⬡ Hexagon'],['tor','🍩 Torus'],['dome','🌗 Dome'],['wheel','🛞 Taayirii']];
+
+/* ---------- objects ---------- */
+function logoMesh(u){const c=document.createElement('canvas');c.width=512;c.height=256;const x=c.getContext('2d');let fs=120;x.font='bold '+fs+'px sans-serif';
+ while(x.measureText(u.txt).width>480&&fs>20){fs-=6;x.font='bold '+fs+'px sans-serif'}
+ x.textAlign='center';x.textBaseline='middle';x.fillStyle=u.c;x.fillText(u.txt,256,128);
+ return new T.Mesh(new T.PlaneGeometry(3,1.5),new T.MeshBasicMaterial({map:new T.CanvasTexture(c),transparent:true,side:T.DoubleSide}))}
+function relief(im,u){const w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0,w,h);const d=x.getImageData(0,0,w,h).data;
+ const geo=new T.PlaneGeometry(4*w/h,4,w-1,h-1),pos=geo.attributes.position,col=new Float32Array(pos.count*3);
+ for(let i=0;i<pos.count;i++){const j=i*4,r=d[j]/255,g=d[j+1]/255,b=d[j+2]/255,l=.3*r+.59*g+.11*b,nx=(i%w)/(w-1)*2-1,ny=((i/w)|0)/(h-1)*2-1,f=Math.max(0,1-(nx*nx+ny*ny)*.8);
+  pos.setZ(i,((u.inv?1-l:l)*.6+f*.4)*(u.depth||1.2));col[i*3]=r;col[i*3+1]=g;col[i*3+2]=b}
+ geo.setAttribute('color',new T.BufferAttribute(col,3));geo.computeVertexNormals();
+ const m=new T.Mesh(geo,new T.MeshStandardMaterial({vertexColors:true,roughness:.8,side:T.DoubleSide}));m.position.y=2;m.castShadow=true;return m}
+function fill(g){const u=g.userData;while(g.children.length)g.remove(g.children[0]);
+ if(u.kind==='pre')PRE[u.n].parts.forEach(s=>g.add(part(s,u.c,u.m,u.w)));
+ else if(u.kind==='prim')g.add(part([u.n,0,0,0,1,1,1,'main'],u.c,u.m,u.w));
+ else if(u.kind==='logo')g.add(logoMesh(u));
+ else if(u.kind==='scan'){const tk=g.__t=(g.__t||0)+1,im=new Image();im.onload=()=>{if(g.__t!==tk)return;while(g.children.length)g.remove(g.children[0]);g.add(relief(im,u))};im.src=u.img}}
+function mk(o2){const g=new T.Group();g.userData=Object.assign({},o2);fill(g);g.position.fromArray(o2.p||[0,0,0]);g.rotation.set(...(o2.r||[0,0,0]));g.scale.fromArray(o2.s||[1,1,1]);world.add(g);return g}
+const st=g=>Object.assign({},g.userData,{p:g.position.toArray(),r:[g.rotation.x,g.rotation.y,g.rotation.z],s:g.scale.toArray()});
+const rj=()=>(Math.random()-.5)*3;
+function addPre(n){select(mk({kind:'pre',n,c:PRE[n].c,m:PRE[n].m,p:[rj(),0,rj()]}));commit()}
+function addPrim(k){select(mk({kind:'prim',n:k,c:'#4f8cff',m:'gloss',p:[rj(),.5,rj()]}));commit()}
+function addScan(src,w,h){const c=document.createElement('canvas');c.width=112;c.height=Math.max(8,Math.round(112*h/w));c.getContext('2d').drawImage(src,0,0,c.width,c.height);
+ select(mk({kind:'scan',img:c.toDataURL('image/jpeg',.85),depth:1.2,p:[0,0,0]}));commit();toast('Scan 3D qophaa’e ✅')}
+
+/* ---------- selection ---------- */
+function select(g){sel=g;sh.visible=!!g&&!an;sync()}
+function sync(){if(!sel)return;const u=sel.userData;if(/^#[0-9a-f]{6}$/i.test(u.c||''))$('#pc').value=u.c;$('#pm').value=u.m||'gloss';$('#pw').checked=!!u.w;
+ $('#sx').value=sel.scale.x;$('#sy').value=sel.scale.y;$('#sz').value=sel.scale.z;$('#ry').value=((sel.rotation.y*180/PI)%360+360)%360;$('#py').value=sel.position.y;if(u.kind==='scan')$('#dep').value=u.depth}
+function prop(k,v){if(!sel)return toast('Duraan meeshaa tuqii filadhu');const u=sel.userData;u[k]=v;
+ if(u.kind==='logo'){if(k==='c')fill(sel);return}if(u.kind==='scan')return;sel.traverse(n=>{if(n.userData.main)n.material=mat(u.c,u.m,u.w)})}
+
+/* ---------- history & storage ---------- */
+function ser(){return JSON.stringify({bg:$('#bg').value,objs:world.children.map(st)})}
+function load(s){const d=JSON.parse(s);while(world.children.length)world.remove(world.children[0]);select(null);if(d.bg){$('#bg').value=d.bg;S.background.set(d.bg);S.fog.color.set(d.bg)}d.objs.forEach(x=>mk(x))}
+function commit(){const s=ser();if(hist[hi]===s)return;hist=hist.slice(0,hi+1);hist.push(s);if(hist.length>60)hist.shift();hi=hist.length-1;try{LS.setItem('naol_cur2',s)}catch(_){}}
+function undo(){if(hi>0){hi--;load(hist[hi]);try{LS.setItem('naol_cur2',hist[hi])}catch(_){}}}
+function redo(){if(hi<hist.length-1){hi++;load(hist[hi]);try{LS.setItem('naol_cur2',hist[hi])}catch(_){}}}
+const PK='naol_projects',gp=()=>JSON.parse(LS.getItem(PK)||'{}');let cid=null;
+function drawP(){const p=gp();$('#pl').innerHTML=Object.keys(p).reverse().map(i=>`<div class="au"><b>${p[i].name}</b> <small>${new Date(+i).toLocaleString()}</small><br><button onclick="openP('${i}')">Bani</button> <button onclick="delP('${i}')">Haqi</button></div>`).join('')||'<small>Pirojektiin hin jiru</small>'}
+function saveP(){const p=gp(),n=$('#pn2').value.replace(/[<>&"']/g,'').trim()||'Pirojektii';if(!cid)cid=Date.now();p[cid]={name:n,data:ser()};try{LS.setItem(PK,JSON.stringify(p));toast('Kuufameera ✅')}catch(_){toast('Bakki guutameera')}drawP()}
+function openP(i){const p=gp()[i];if(!p)return;cid=i;$('#pn2').value=p.name;load(p.data);hist=[];hi=-1;commit();toast('Banameera')}
+function delP(i){const p=gp();delete p[i];LS.setItem(PK,JSON.stringify(p));if(cid==i)cid=null;drawP()}
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click()}
+
+/* ---------- pointer controls ---------- */
+const ray=new T.Raycaster(),pt=new T.Vector2(),pl=new T.Plane(new T.Vector3(0,1,0),0),v3=new T.Vector3(),P=new Map();let drag=null,moved=0,pd=0;
+function setRay(e){const b=cv.getBoundingClientRect();pt.set((e.clientX-b.left)/b.width*2-1,-(e.clientY-b.top)/b.height*2+1);ray.setFromCamera(pt,cam)}
+function pick(e){setRay(e);const h=ray.intersectObjects(world.children,true);if(!h.length)return null;let n=h[0].object;while(n.parent!==world)n=n.parent;return n}
+function pan(dx,dy){const r=new T.Vector3().setFromMatrixColumn(cam.matrixWorld,0),u=new T.Vector3().setFromMatrixColumn(cam.matrixWorld,1);o.t.addScaledVector(r,-dx*o.r*.0015).addScaledVector(u,dy*o.r*.0015)}
+cv.addEventListener('pointerdown',e=>{if(an)return;cv.setPointerCapture(e.pointerId);P.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=0;pd=0;
+ if(P.size>1){drag=null;return}
+ const h=pick(e);drag={obj:h};if(h){select(h);pl.constant=-h.position.y;setRay(e);drag.off=ray.ray.intersectPlane(pl,v3)?h.position.clone().sub(v3):new T.Vector3()}});
+cv.addEventListener('pointermove',e=>{const p=P.get(e.pointerId);if(!p)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
+ if(P.size>1){const q=[...P.values()],d=Math.hypot(q[0].x-q[1].x,q[0].y-q[1].y);if(pd)o.r=cl(o.r*pd/d,1,150);pd=d;pan(dx/2,dy/2);moved=99;return}
+ moved+=Math.abs(dx)+Math.abs(dy);if(!drag)return;
+ if(!drag.obj){o.th-=dx*.008;o.ph=cl(o.ph-dy*.008,.05,3.05);return}
+ if(moved<5)return;const g=drag.obj;
+ if(mode==='move'){setRay(e);if(ray.ray.intersectPlane(pl,v3)){g.position.x=v3.x+drag.off.x;g.position.z=v3.z+drag.off.z;if(snap){g.position.x=Math.round(g.position.x*4)/4;g.position.z=Math.round(g.position.z*4)/4}}}
+ else if(mode==='lift')g.position.y-=dy*.02*o.r/10;
+ else if(mode==='rot')g.rotation.y+=dx*.01;
+ else if(mode==='scl')g.scale.multiplyScalar(1-dy*.006);
+ drag.ch=1;sync()});
+const up=e=>{if(!P.has(e.pointerId))return;P.delete(e.pointerId);pd=0;
+ if(P.size===0){if(drag){if(!drag.obj&&moved<6)select(null);else if(drag.ch){if(snap&&mode==='rot'&&sel)sel.rotation.y=Math.round(sel.rotation.y/(PI/12))*PI/12;commit()}}drag=null}};
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+cv.addEventListener('wheel',e=>{e.preventDefault();o.r=cl(o.r*(1+e.deltaY*.001),1,150)},{passive:false});
+
+/* ---------- UI wiring ---------- */
+$('#tools').innerHTML=['move|✥ Socho’i','rot|⟳ Naanni’i','scl|⤢ Guddisi','lift|↕ Ol/Gad'].map(s=>{const[a,b]=s.split('|');return`<button data-m="${a}" class="${a==='move'?'on':''}">${b}</button>`}).join('')+'<button id="sn">▦ Snap</button><button id="fa">⛶ Hunda</button><button id="dup">⧉ Garagalchi</button><button id="rm">🗑️ Haqi</button>';
+$$('[data-m]').forEach(b=>b.onclick=()=>{mode=b.dataset.m;$$('[data-m]').forEach(x=>x.classList.toggle('on',x===b))});
+$('#sn').onclick=ev=>{snap=!snap;ev.currentTarget.classList.toggle('on',snap)};
+$('#fa').onclick=()=>{const b=new T.Box3().setFromObject(world);if(b.isEmpty())return;o.t.copy(b.getCenter(new T.Vector3()));o.r=Math.max(5,b.getSize(new T.Vector3()).length()*1.3)};
+$('#dup').onclick=()=>{if(!sel)return toast('Duraan meeshaa filadhu');const u=st(sel);u.p[0]+=1;select(mk(u));commit()};
+$('#rm').onclick=()=>{if(!sel)return toast('Duraan meeshaa filadhu');world.remove(sel);select(null);commit()};
+$('#un').onclick=undo;$('#rd').onclick=redo;$('#fs').onclick=()=>{document.body.classList.toggle('fs');setTimeout(rs,50)};
+const TABS=[['pre','🧩 Fakkeenya'],['add','➕ Dabali'],['ed','✏️ Gulaali'],['col','🎨 Halluu'],['logo','🏷️ Logo'],['env','💡 Naannoo'],['scan','📷 Scan 3D'],['sv','💾 Kuusi'],['vd','🎬 Viidiyoo']];
+$('#tabs').innerHTML=TABS.map(t=>`<button data-t="${t[0]}">${t[1]}</button>`).join('');
+function tab(id){$$('[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===id));$$('.pg').forEach(p=>p.classList.toggle('on',p.id==='pg-'+id));if(id==='sv')drawP()}
+$$('[data-t]').forEach(b=>b.onclick=()=>tab(b.dataset.t));tab('pre');
+$('#gpre').innerHTML=Object.keys(PRE).map(k=>`<button onclick="addPre('${k}')">${PRE[k].l}</button>`).join('');
+$('#gadd').innerHTML=PRIM.map(p=>`<button onclick="addPrim('${p[0]}')">${p[1]}</button>`).join('');
+$('#sw').innerHTML=['#e53935','#fb8c00','#fdd835','#43a047','#00acc1','#1e88e5','#5e35b1','#d81b60','#ffffff','#bdbdbd','#616161','#111111','#6d4c41','#ffcc80','#a5d6a7','#90caf9'].map(c=>`<i style="background:${c}" data-c="${c}"></i>`).join('');
+$$('#sw i').forEach(i=>i.onclick=()=>{prop('c',i.dataset.c);if(sel){$('#pc').value=i.dataset.c;commit()}});
+$('#pc').oninput=ev=>prop('c',ev.target.value);$('#pc').onchange=commit;
+$('#pm').onchange=ev=>{prop('m',ev.target.value);commit()};$('#pw').onchange=ev=>{prop('w',ev.target.checked);commit()};
+[['sx','x'],['sy','y'],['sz','z']].forEach(([i,a])=>{$('#'+i).oninput=ev=>{if(sel)sel.scale[a]=+ev.target.value};$('#'+i).onchange=commit});
+$('#ry').oninput=ev=>{if(sel)sel.rotation.y=ev.target.value*PI/180};$('#ry').onchange=commit;
+$('#py').oninput=ev=>{if(sel)sel.position.y=+ev.target.value};$('#py').onchange=commit;
+$('#la').onclick=()=>{select(mk({kind:'logo',txt:$('#lt').value||'Logo',c:$('#lc').value,p:[0,1.5,0]}));commit()};
+$('#lu').onclick=()=>{if(sel&&sel.userData.kind==='logo'){sel.userData.txt=$('#lt').value;sel.userData.c=$('#lc').value;fill(sel);commit()}else toast('Duraan logo filadhu')};
+$('#bg').oninput=ev=>S.background.set(ev.target.value);S.fog.color.set(ev.target.value);$('#bg').onchange=commit;
+$('#li').oninput=ev=>{const v=+ev.target.value;hemi.intensity=v*.45;sun.intensity=v};
+function envu(){grid.visible=$('#gr').checked;fl.visible=$('#fl').checked;ground.visible=!fl.visible&&$('#shd').checked;fl.material.color.set($('#fc').value)}
+['gr','shd','fl','fc'].forEach(i=>$('#'+i).oninput=envu);
+$('#sf').onchange=ev=>{const f=ev.target.files[0];if(!f)return;const im=new Image();im.onload=()=>addScan(im,im.width,im.height);im.src=URL.createObjectURL(f)};
+$('#dep').oninput=ev=>{if(sel&&sel.userData.kind==='scan'){sel.userData.depth=+ev.target.value;fill(sel)}};$('#dep').onchange=commit;
+$('#inv').onclick=()=>{if(sel&&sel.userData.kind==='scan'){sel.userData.inv=!sel.userData.inv;fill(sel);commit()}else toast('Duraan scan filadhu')};
+let cs=null;
+$('#cm').onclick=async()=>{try{cs=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});$('#cvid').srcObject=cs;$('#camov').style.display='flex'}catch(_){toast('Kaameraa banuu hin danda’amne')}};
+function closeCam(){if(cs)cs.getTracks().forEach(t=>t.stop());$('#camov').style.display='none'}
+$('#snap').onclick=()=>{const v=$('#cvid');if(v.videoWidth)addScan(v,v.videoWidth,v.videoHeight);closeCam();tab('ed')};$('#camx').onclick=closeCam;
+$('#sp').onclick=saveP;
+$('#np').onclick=()=>{cid=null;while(world.children.length)world.remove(world.children[0]);select(null);$('#pn2').value='Pirojektii haaraa';commit()};
+$('#ex').onclick=()=>dl(new Blob([ser()],{type:'application/json'}),'naol3d-project.json');
+$('#im').onchange=ev=>{const f=ev.target.files[0];if(!f)return;f.text().then(t=>{try{load(t);commit()}catch(_){toast('Faayilii dogoggora')}})};
+$('#pg2').onclick=()=>{sh.visible=false;R.render(S,cam);cv.toBlob(b=>dl(b,'naol3d.png'));sh.visible=!!sel};
+$('#dur').oninput=ev=>$('#dv').textContent=ev.target.value;
+
+/* ---------- audio ---------- */
+const AU=[];let actx=null;
+async function addAudio(files){for(const f of files){if(AU.length>=20){toast('Hanga 20');break}actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+ try{const buf=await actx.decodeAudioData(await f.arrayBuffer());AU.push({name:f.name.replace(/[<>&"']/g,''),buf,start:0,vol:1})}catch(_){toast('Audio dubbisuu hin danda’amne')}}drawAU()}
+function drawAU(){$('#aul').innerHTML=AU.map((a,i)=>`<div class="au"><b>${i+1}. ${a.name.slice(0,24)}</b> <small>${a.buf.duration.toFixed(1)}s</small><br>Jalqaba (s) <input type="number" min="0" step=".5" value="${a.start}" style="width:64px" onchange="AU[${i}].start=+this.value"> Sagalee <input type="range" min="0" max="1" step=".05" value="${a.vol}" style="width:90px" oninput="AU[${i}].vol=+this.value"> <button onclick="AU.splice(${i},1);drawAU()">✕</button></div>`).join('')+`<small>${AU.length}/20</small>`}
+$('#af').onchange=ev=>{addAudio([...ev.target.files]);ev.target.value=''};
+
+/* ---------- video ---------- */
+async function startRec(dur){const q=+$('#q').value,b=$('#cw').getBoundingClientRect(),asp=b.width/b.height;
+ let w=asp>=1?q:Math.round(q*asp),h=asp>=1?Math.round(q/asp):q;w&=~1;h&=~1;rec=1;fit(w,h,1);R.render(S,cam);
+ const tr=[...cv.captureStream(30).getVideoTracks()],src=[];
+ if(AU.length){try{await actx.resume();const d=actx.createMediaStreamDestination(),m=actx.createGain(),t0=actx.currentTime;m.connect(d);
+  AU.forEach(x=>{const s=actx.createBufferSource(),g=actx.createGain();s.buffer=x.buf;g.gain.value=x.vol;s.connect(g);g.connect(m);s.start(t0+x.start);src.push(s)});
+  m.gain.setValueAtTime(1,t0+Math.max(0,dur-1));m.gain.linearRampToValueAtTime(0,t0+dur);tr.push(d.stream.getAudioTracks()[0])}catch(_){toast('Audio dogoggora')}}
+ const mt=['video/mp4;codecs=avc1','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(t=>MediaRecorder.isTypeSupported(t))||'',ch=[];
+ mr=new MediaRecorder(new MediaStream(tr),{mimeType:mt||undefined,videoBitsPerSecond:q>=1920?16e6:q>=1280?10e6:6e6});
+ mr.ondataavailable=ev=>{if(ev.data.size)ch.push(ev.data)};
+ mr.onstop=()=>{const bl=new Blob(ch,{type:mt||'video/webm'}),u=URL.createObjectURL(bl),l=$('#dlv');$('#rv').src=u;$('#rv').style.display='block';l.href=u;l.download='Naol3D.'+(mt.includes('mp4')?'mp4':'webm');l.style.display='block';rec=0;rs();toast('Viidiyoon qophaa’e ✅')};
+ mr.start(500);return src}
+async function startAnim(r){if(an||rec)return;const dur=+$('#dur').value;let src=[];sh.visible=false;grid.visible=false;
+ if(r)src=await startRec(dur);
+ an={t0:performance.now(),dur,rec:r,th0:o.th,ph0:o.ph,r0:o.r,a:0,src}}
+function endAnim(){const a=an;an=null;o.th=a.th0;o.ph=a.ph0;o.r=a.r0;grid.visible=$('#gr').checked;sh.visible=!!sel;
+ if(a.rec&&mr&&mr.state!=='inactive')mr.stop();a.src.forEach(s=>{try{s.stop()}catch(_){}});$('#st').textContent=''}
+$('#pv').onclick=()=>startAnim(false);
+$('#rc').onclick=()=>{if(typeof MediaRecorder==='undefined')return toast('Browser kee recording hin deggerru');startAnim(true)};
+$('#stp').onclick=()=>{if(an)endAnim()};
+
+let last=0;
+function loop(now){requestAnimationFrame(loop);const dt=Math.min(.1,(now-last)/1000);last=now;
+ if(an){const t=(now-an.t0)/1000;
+  if(t>=an.dur)endAnim();
+  else{const hk=$('#hk').checked,f=1+(hk?4*Math.exp(-t/1.1):0);an.a+=dt*(+$('#spd').value)*($('#sl').checked?.3:1)*f;
+   const k=t/an.dur,z=$('#zm').value;let zf=z==='in'?1-.5*k:z==='out'?1+.8*k:z==='pulse'?1-.4*Math.sin(k*PI):1;if(hk)zf*=1+.9*Math.exp(-t/1.2);
+   o.th=an.th0+an.a;o.ph=cl(an.ph0+(+$('#sw2').value)*Math.sin(t*.8),.2,2.9);o.r=an.r0*zf;
+   if(an.rec)$('#st').textContent='● '+t.toFixed(0)+'s / '+an.dur+'s'}}
+ uc();if(sel&&!an)sh.box.setFromObject(sel);R.render(S,cam)}
+
+/* ---------- start ---------- */
+rs();
+try{const ini=LS.getItem('naol_cur2');if(ini)load(ini);else mk({kind:'pre',n:'car',c:PRE.car.c,m:PRE.car.m,p:[0,0,0]})}catch(_){mk({kind:'pre',n:'car',c:PRE.car.c,m:PRE.car.m,p:[0,0,0]})}
+envu();hist=[ser()];hi=0;requestAnimationFrame(loop);
+</script></body></html>
