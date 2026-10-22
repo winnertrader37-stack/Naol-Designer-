@@ -39,7 +39,7 @@ body.fs #side{display:none}
 <div id="app">
 <header><h1>Naol <b>3D</b> Design</h1><div><button id="un">↶</button> <button id="rd">↷</button> <button id="fs">⇅</button></div></header>
 <main>
-<div id="stage"><div id="cw"><canvas id="c"></canvas><div id="hint">Meesha tuqi = filadhu • harkisi = sochoosi • bakka duwwaa harkisi = naannoo naanna’i • quba lama = zoom</div><div id="st"></div></div><div id="tools"></div></div>
+<div id="stage"><div id="cw"><canvas id="c"></canvas><div id="hint">Meesha tuqi = filadhu • harkisi = sochoosi • bakka duwwaa harkisi = naannoo naanna’i • quba lama = zoom • v5</div><div id="st"></div></div><div id="tools"></div></div>
 <div id="side"><div id="tabs"></div><div id="pnl">
 
 <div class="pg" id="pg-pre"><div class="grid" id="gpre"></div><p><small>Fakkeenya tokko filachuun qaama hundaa jijjiiruu, halluu itti dabaluu, logo itti maxxansuu ni dandeessa.</small></p></div>
@@ -115,21 +115,20 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],T=T
 const cl=(v,a,b)=>Math.min(b,Math.max(a,v));
 function toast(t){const e=$('#toast');e.textContent=t;e.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>e.style.opacity=0,2200)}
 
+window.onerror=m=>toast('Dogoggora: '+m);
 /* ---------- scene ---------- */
 const cv=$('#c'),R=new T.WebGLRenderer({canvas:cv,antialias:true,preserveDrawingBuffer:true});
-R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.05;R.outputEncoding=T.sRGBEncoding;
+R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;R.outputEncoding=T.sRGBEncoding;
 const S=new T.Scene();S.background=new T.Color('#dfe3ea');S.fog=new T.Fog('#dfe3ea',35,110);
 const cam=new T.PerspectiveCamera(50,1,.1,1000);
 const hemi=new T.HemisphereLight(0xffffff,0x9aa0b4,.72);S.add(hemi);
 const sun=new T.DirectionalLight(0xffffff,.9);sun.position.set(6,10,6);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.bias=-.0005;sun.shadow.normalBias=.05;sun.shadow.radius=3;
 Object.assign(sun.shadow.camera,{left:-12,right:12,top:12,bottom:-12});sun.shadow.camera.updateProjectionMatrix();S.add(sun);const fl2=new T.DirectionalLight(0xffffff,.4);fl2.position.set(-8,5,-6);S.add(fl2);
-try{(()=>{const e=new T.Scene(),c=document.createElement('canvas');c.width=4;c.height=256;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'#cfd8ea');g.addColorStop(.5,'#ffffff');g.addColorStop(.52,'#9aa0aa');g.addColorStop(1,'#6b7080');x.fillStyle=g;x.fillRect(0,0,4,256);
-e.add(new T.Mesh(new T.SphereGeometry(50,32,16),new T.MeshBasicMaterial({map:new T.CanvasTexture(c),side:T.BackSide})));
-[[0,30,0,30,1,30],[-25,12,0,1,14,30],[25,12,0,1,14,30],[0,10,-28,40,14,1]].forEach(a=>{const m=new T.MeshBasicMaterial();m.color.setScalar(5);const b=new T.Mesh(new T.BoxGeometry(a[3],a[4],a[5]),m);b.position.set(a[0],a[1],a[2]);e.add(b)});
-S.environment=new T.PMREMGenerator(R).fromScene(e,.02).texture})()}catch(_){}
+const ENV=(()=>{const mk2=(a,b,c)=>{const k=document.createElement('canvas');k.width=k.height=64;const x=k.getContext('2d'),g=x.createLinearGradient(0,0,0,64);g.addColorStop(0,a);g.addColorStop(.5,b);g.addColorStop(.52,c);g.addColorStop(1,c);x.fillStyle=g;x.fillRect(0,0,64,64);return k},
+side=mk2('#dfe8ff','#ffffff','#9aa0ae'),top=mk2('#ffffff','#ffffff','#ffffff'),bot=mk2('#8a8f9c','#8a8f9c','#8a8f9c'),t=new T.CubeTexture([side,side,top,bot,side,side]);t.needsUpdate=true;return t})();
 const grid=new T.GridHelper(60,60,0xaab1c0,0xc5cad6);S.add(grid);
 const ground=new T.Mesh(new T.PlaneGeometry(200,200),new T.ShadowMaterial({opacity:.35}));ground.rotation.x=-PI/2;ground.receiveShadow=true;S.add(ground);
-const fl=new T.Mesh(new T.PlaneGeometry(200,200),new T.MeshStandardMaterial({color:'#e6e9ef',roughness:.9}));fl.rotation.x=-PI/2;fl.position.y=-.01;fl.receiveShadow=true;fl.visible=true;S.add(fl);
+const fl=new T.Mesh(new T.PlaneGeometry(200,200),new T.MeshLambertMaterial({color:'#e6e9ef'}));fl.rotation.x=-PI/2;fl.position.y=-.01;fl.receiveShadow=true;fl.visible=true;S.add(fl);
 const world=new T.Group();S.add(world);
 const sh=new T.Box3Helper(new T.Box3(),0xffb300);sh.visible=false;S.add(sh);
 let sel=null,rec=0,mr=null,an=null,mode='move',snap=false,hist=[],hi=-1;
@@ -141,8 +140,9 @@ function rs(){if(rec)return;const b=$('#cw').getBoundingClientRect();if(b.width>
 new ResizeObserver(rs).observe($('#cw'));
 
 /* ---------- materials & parts ---------- */
-const MT={matte:{roughness:.85,metalness:0},gloss:{roughness:.28,metalness:.1},metal:{roughness:.3,metalness:.6},glass:{roughness:.02,metalness:0,transparent:true,opacity:.4},glow:{roughness:.4,metalness:0}};
-function mat(c,m,w){const p=Object.assign({color:c,wireframe:!!w},MT[m]||MT.gloss);if(m==='glow'){p.emissive=c;p.emissiveIntensity=.8}p.side=T.DoubleSide;return new T.MeshStandardMaterial(p)}
+const MT={matte:{shininess:6,specular:0x111111},gloss:{shininess:90,specular:0x888888,reflectivity:.18},metal:{shininess:70,specular:0xffffff,reflectivity:.55},glass:{shininess:120,specular:0xffffff,transparent:true,opacity:.4,reflectivity:.3},glow:{shininess:30,specular:0x222222}};
+function mat(c,m,w){const p=Object.assign({color:c,wireframe:!!w,side:T.DoubleSide,reflectivity:0,specular:0x333333},MT[m]||MT.gloss);if(p.reflectivity>0){p.envMap=ENV;p.combine=T.MixOperation}
+ if(m==='metal')p.color=new T.Color(c).multiplyScalar(.75);if(m==='glow')p.emissive=c;return new T.MeshPhongMaterial(p)}
 const lathe=p=>new T.LatheGeometry(p,32),shp=p=>{const h=new T.Shape();p.forEach((a,i)=>i?h.lineTo(a[0],a[1]):h.moveTo(a[0],a[1]));return h},ex=(h,d)=>{const g=new T.ExtrudeGeometry(h,{depth:d,bevelEnabled:true,bevelSize:.02,bevelThickness:.02,bevelSegments:2});g.center();return g};
 function rbox(r,n){const g=new T.BoxGeometry(1,1,1,n,n,n),p=g.attributes.position,nm=g.attributes.normal,v=new T.Vector3(),c=new T.Vector3(),d=new T.Vector3(),k=.5-r;
 for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);c.set(cl(v.x,-k,k),cl(v.y,-k,k),cl(v.z,-k,k));d.copy(v).sub(c);if(d.lengthSq()>1e-8){d.normalize();nm.setXYZ(i,d.x,d.y,d.z);d.multiplyScalar(r)}p.setXYZ(i,c.x+d.x,c.y+d.y,c.z+d.z)}return g}
@@ -190,7 +190,7 @@ function relief(im,u){const w=im.width,h=im.height,c=document.createElement('can
  for(let i=0;i<pos.count;i++){const j=i*4,r=d[j]/255,g=d[j+1]/255,b=d[j+2]/255,l=.3*r+.59*g+.11*b,nx=(i%w)/(w-1)*2-1,ny=((i/w)|0)/(h-1)*2-1,f=Math.max(0,1-(nx*nx+ny*ny)*.8);
   pos.setZ(i,((u.inv?1-l:l)*.6+f*.4)*(u.depth||1.2));col[i*3]=r;col[i*3+1]=g;col[i*3+2]=b}
  geo.setAttribute('color',new T.BufferAttribute(col,3));geo.computeVertexNormals();
- const m=new T.Mesh(geo,new T.MeshStandardMaterial({vertexColors:true,roughness:.8,side:T.DoubleSide}));m.position.y=2;m.castShadow=true;return m}
+ const m=new T.Mesh(geo,new T.MeshPhongMaterial({vertexColors:true,shininess:20,side:T.DoubleSide}));m.position.y=2;m.castShadow=true;return m}
 function fill(g){const u=g.userData;while(g.children.length)g.remove(g.children[0]);
  if(u.kind==='pre')PRE[u.n].parts.forEach(s=>g.add(part(s,u.c,u.m,u.w)));
  else if(u.kind==='prim')g.add(part([u.n,0,0,0,1,1,1,'main'],u.c,u.m,u.w));
@@ -270,7 +270,7 @@ $('#ry').oninput=ev=>{if(sel)sel.rotation.y=ev.target.value*PI/180};$('#ry').onc
 $('#py').oninput=ev=>{if(sel)sel.position.y=+ev.target.value};$('#py').onchange=commit;
 $('#la').onclick=()=>{select(mk({kind:'logo',txt:$('#lt').value||'Logo',c:$('#lc').value,p:[0,1.5,0]}));commit()};
 $('#lu').onclick=()=>{if(sel&&sel.userData.kind==='logo'){sel.userData.txt=$('#lt').value;sel.userData.c=$('#lc').value;fill(sel);commit()}else toast('Duraan logo filadhu')};
-$('#bg').oninput=ev=>S.background.set(ev.target.value);S.fog.color.set(ev.target.value);$('#bg').onchange=commit;
+$('#bg').oninput=ev=>{S.background.set(ev.target.value);S.fog.color.set(ev.target.value)};$('#bg').onchange=commit;
 $('#li').oninput=ev=>{const v=+ev.target.value;hemi.intensity=v*.8;sun.intensity=v};
 function envu(){grid.visible=$('#gr').checked;fl.visible=$('#fl').checked;ground.visible=!fl.visible&&$('#shd').checked;fl.material.color.set($('#fc').value)}
 ['gr','shd','fl','fc'].forEach(i=>$('#'+i).oninput=envu);
